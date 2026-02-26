@@ -1,7 +1,7 @@
 /** @format */
 
 import { execFile } from 'child_process'
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import sharp from 'sharp'
@@ -77,8 +77,19 @@ ipcMain.handle('select-folder', async () => {
   return res.filePaths[0]
 })
 
-ipcMain.handle('start-compress', async (event, folderPath: string) => {
+interface CompressParams {
+  videoCrf?: number
+  audioBitrate?: string
+  imageQuality?: number
+}
+
+ipcMain.handle('start-compress', async (event, folderPath: string, params?: CompressParams) => {
   try {
+    const p = params ?? {}
+    const videoCrf = Math.min(Math.max(p.videoCrf ?? 23, 18), 32)
+    const audioBitrate = p.audioBitrate ?? '96k'
+    const imageQuality = Math.min(Math.max(p.imageQuality ?? 75, 50), 95)
+
     const files = fs.readdirSync(folderPath)
     const outputDir = path.join(path.dirname(folderPath), path.basename(folderPath) + '_压缩后')
 
@@ -110,7 +121,7 @@ ipcMain.handle('start-compress', async (event, folderPath: string) => {
           '-vcodec',
           'libx264',
           '-crf',
-          '23',
+          String(videoCrf),
           outputPath
         ])
       }
@@ -122,7 +133,7 @@ ipcMain.handle('start-compress', async (event, folderPath: string) => {
           await runFFmpeg([
             '-i', fullPath,
             '-c:a', 'libmp3lame',
-            '-b:a', '96k',
+            '-b:a', audioBitrate,
             '-y',
             outputPath
           ])
@@ -130,7 +141,7 @@ ipcMain.handle('start-compress', async (event, folderPath: string) => {
           await runFFmpeg([
             '-i', fullPath,
             '-c:a', 'aac',
-            '-b:a', '96k',
+            '-b:a', audioBitrate,
             '-y',
             outputPath
           ])
@@ -138,15 +149,20 @@ ipcMain.handle('start-compress', async (event, folderPath: string) => {
       }
 
       if (type === 'image') {
-        await sharp(fullPath).jpeg({ quality: 75 }).toFile(outputPath)
+        await sharp(fullPath).jpeg({ quality: imageQuality }).toFile(outputPath)
       }
 
       processed++
       event.sender.send('progress', { current: processed, total })
+      event.sender.send('file-complete', { fileName: file })
     }
 
-    return { ok: true }
+    return { ok: true, outputDir }
   } catch (err: any) {
     return { ok: false, error: err?.message || String(err) }
   }
+})
+
+ipcMain.handle('open-folder', async (_event, folderPath: string) => {
+  await shell.openPath(folderPath)
 })

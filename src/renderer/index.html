@@ -5,100 +5,315 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>媒体压缩工具</title>
   <style>
+    :root {
+      --bg: #0f1012;
+      --surface: #1a1b1e;
+      --surface-alt: #25262b;
+      --border: #2e3035;
+      --text: #e4e4e7;
+      --text-muted: #71717a;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #22c55e;
+      --success-hover: #16a34a;
+    }
     * { box-sizing: border-box; }
-    body {
+    html, body {
       margin: 0;
-      min-height: 100vh;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: #1a1b1e;
-      color: #e4e4e7;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    body { display: flex; }
+    .card {
+      display: flex;
+      flex-direction: row;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 12px;
+      border: 1px solid var(--border);
+    }
+    .card-left, .card-right {
+      flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
     }
-    .card {
-      background: #25262b;
-      border-radius: 12px;
-      padding: 2rem;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+    .card-left { gap: 8px; }
+    .card-right { gap: 12px; }
+    .config-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .params-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--surface-alt);
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid var(--border);
+    }
+    .param-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .param-group-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .param-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .param-row label { min-width: 3.5em; font-size: 0.85rem; }
+    .param-row input[type="range"] {
+      flex: 1;
+      height: 5px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--bg);
+      border-radius: 3px;
+    }
+    .param-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .param-row input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+    .param-row input[type="range"]::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+    .param-value {
+      min-width: 2rem;
+      font-size: 0.85rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+    .param-row select {
+      flex: 1;
+      padding: 6px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .param-row select:hover, .param-row select:focus {
+      border-color: var(--accent);
+      outline: none;
     }
     h1 {
-      margin: 0 0 1.5rem;
-      font-size: 1.35rem;
+      margin: 0;
+      font-size: 1.1rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text);
     }
     .actions {
       display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
+      gap: 8px;
     }
     button {
       flex: 1;
-      padding: 0.65rem 1rem;
+      padding: 10px 14px;
       font-size: 0.9rem;
       font-weight: 500;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.15s, opacity 0.15s;
+      transition: background 0.15s, transform 0.1s;
     }
-    button:hover:not(:disabled) { opacity: 0.92; }
-    button:active:not(:disabled) { opacity: 0.88; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button:hover:not(:disabled) { transform: translateY(-1px); }
+    button:active:not(:disabled) { transform: translateY(0); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
     #selectBtn {
-      background: #3b82f6;
+      background: var(--accent);
       color: #fff;
     }
+    #selectBtn:hover:not(:disabled) { background: var(--accent-hover); }
     #startBtn {
-      background: #22c55e;
+      background: var(--success);
       color: #fff;
     }
+    #startBtn:hover:not(:disabled) { background: var(--success-hover); }
     #folder {
-      margin: 0 0 1rem;
-      padding: 0.6rem 0.75rem;
-      background: #2c2d31;
+      margin: 0;
+      padding: 10px 12px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 0.85rem;
-      color: #a1a1aa;
-      min-height: 2.5rem;
+      color: var(--text-muted);
+      min-height: 48px;
       word-break: break-all;
     }
-    #folder:not(:empty) { color: #e4e4e7; }
+    #folder:not(:empty) { color: var(--text); }
     progress {
       width: 100%;
-      height: 8px;
-      margin-bottom: 0.5rem;
-      border-radius: 4px;
+      height: 6px;
+      margin: 0;
+      border-radius: 3px;
       overflow: hidden;
-      background: #2c2d31;
+      background: var(--surface-alt);
       -webkit-appearance: none;
       appearance: none;
     }
-    progress::-webkit-progress-bar { background: #2c2d31; }
-    progress::-webkit-progress-value { background: #3b82f6; border-radius: 4px; }
-    progress::-moz-progress-bar { background: #3b82f6; border-radius: 4px; }
+    progress::-webkit-progress-bar { background: var(--surface-alt); }
+    progress::-webkit-progress-value {
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.2s ease;
+    }
+    progress::-moz-progress-bar {
+      background: var(--accent);
+      border-radius: 3px;
+    }
     #status {
-      font-size: 0.85rem;
-      color: #71717a;
+      font-size: 0.8rem;
+      color: var(--text-muted);
       min-height: 1.25rem;
+    }
+    .completed-section {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .completed-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .open-folder-btn {
+      flex: none;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .open-folder-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+    }
+    .open-folder-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .completed-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    #completedList {
+      flex: 1;
+      overflow-y: auto;
+      margin: 0;
+      padding: 8px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      list-style: none;
+    }
+    #completedList li {
+      padding: 4px 0;
+      color: var(--text);
+      word-break: break-all;
+      border-bottom: 1px solid var(--border);
+    }
+    #completedList li:last-child { border-bottom: none; }
+    #completedList:empty::before {
+      content: "暂无";
+      color: var(--text-muted);
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>批量压缩工具</h1>
-    <div class="actions">
-      <button id="selectBtn" type="button">选择文件夹</button>
-      <button id="startBtn" type="button">开始压缩</button>
+    <div class="card-left">
+      <div class="config-title">压缩参数</div>
+      <div class="params-panel">
+        <div class="param-group">
+          <div class="param-group-title">视频</div>
+          <div class="param-row">
+            <label for="videoCrf">CRF</label>
+            <input type="range" id="videoCrf" min="18" max="32" value="23" />
+            <span class="param-value" id="videoCrfValue">23</span>
+          </div>
+        </div>
+        <div class="param-group">
+          <div class="param-group-title">音频</div>
+          <div class="param-row">
+            <label for="audioBitrate">比特率</label>
+            <select id="audioBitrate">
+              <option value="64k">64k</option>
+              <option value="96k" selected>96k</option>
+              <option value="128k">128k</option>
+              <option value="192k">192k</option>
+              <option value="320k">320k</option>
+            </select>
+          </div>
+        </div>
+        <div class="param-group">
+          <div class="param-group-title">图片</div>
+          <div class="param-row">
+            <label for="imageQuality">质量</label>
+            <input type="range" id="imageQuality" min="50" max="95" value="75" />
+            <span class="param-value" id="imageQualityValue">75</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <p id="folder" aria-live="polite"></p>
-    <progress id="progress" value="0" max="100" aria-label="压缩进度"></progress>
-    <p id="status"></p>
+    <div class="card-right">
+      <h1>批量压缩工具</h1>
+      <div class="actions">
+        <button id="selectBtn" type="button">选择文件夹</button>
+        <button id="startBtn" type="button">开始压缩</button>
+      </div>
+      <p id="folder" aria-live="polite"></p>
+      <progress id="progress" value="0" max="100" aria-label="压缩进度"></progress>
+      <p id="status"></p>
+      <div class="completed-section">
+        <div class="completed-header">
+          <span class="completed-title">已完成</span>
+          <button id="openOutputBtn" type="button" class="open-folder-btn" disabled>打开输出文件夹</button>
+        </div>
+        <ul id="completedList"></ul>
+      </div>
+    </div>
   </div>
   <script src="ui.js"></script>
 </body>
