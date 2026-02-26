@@ -34,10 +34,16 @@ const ffmpegName = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
 
 function getFFmpegPath() {
   if (app.isPackaged) {
-    return path.join(process.resourcesPath, 'resources', ffmpegName)
+    // ✅ 打包后 ffmpeg 就在 resources 根目录
+    return path.join(process.resourcesPath, ffmpegName)
   }
+
+  // ✅ 开发环境
   const localPath = path.join(process.cwd(), 'resources', ffmpegName)
+
   if (fs.existsSync(localPath)) return localPath
+
+  // ✅ fallback：使用系统 ffmpeg（mac 已安装）
   return 'ffmpeg'
 }
 
