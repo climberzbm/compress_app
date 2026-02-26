@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ES2020",
+    "moduleResolution": "Bundler",
+    "outDir": "dist/renderer",
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src/renderer/**/*"]
+}

@@ -1,0 +1,86 @@
+{
+  "name": "compressed_app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && tsc -p tsconfig.renderer.json && node scripts/copy-renderer.js",
+    "start": "npm run build && electron dist/main/main.js",
+    "dev": "npm run build && concurrently -k \"tsc -w\" \"tsc -p tsconfig.renderer.json -w\" \"nodemon --watch src/renderer/index.html --exec \\\"node scripts/copy-renderer.js\\\"\" \"nodemon --watch dist/main --watch dist/preload --ext js --exec \\\"electron dist/main/main.js\\\"\"",
+    "pack": "npm run build && electron-builder",
+    "pack:mac": "npm run build && electron-builder --mac",
+    "pack:win": "npm run build && electron-builder --win"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "chokidar": "^4.0.1",
+    "concurrently": "^9.1.0",
+    "electron": "^40.6.0",
+    "electron-builder": "^26.8.1",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "shx": "^0.3.4"
+  },
+  "dependencies": {
+    "sharp": "^0.33.5"
+  },
+  "build": {
+    "appId": "com.climberzbm.compressedapp",
+    "productName": "媒体压缩工具",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "package.json",
+      {
+        "from": "dist",
+        "to": "dist",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.utilities",
+      "extraResources": [
+        {
+          "from": "resources/ffmpeg",
+          "to": "ffmpeg",
+          "filter": [
+            "*"
+          ]
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "resources/icon.ico",
+      "executableName": "CompressedApp",
+      "extraResources": [
+        {
+          "from": "resources/ffmpeg.exe",
+          "to": "resources",
+          "filter": [
+            "*"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
