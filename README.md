@@ -13,6 +13,13 @@
 npm install
 ```
 
+### FFmpeg（视频/音频压缩必需）
+
+打包前需将 FFmpeg 放入 `resources` 目录：
+
+- **Windows**：下载 [ffmpeg releases](https://github.com/BtbN/FFmpeg-Builds/releases)，解压后将 `ffmpeg.exe` 放到 `resources/` 下
+- **macOS**：`brew install ffmpeg` 后，将 `/opt/homebrew/bin/ffmpeg` 复制到 `resources/ffmpeg`
+
 ## 开发
 
 ```bash

@@ -71,7 +71,7 @@
       "extraResources": [
         {
           "from": "resources/ffmpeg.exe",
-          "to": "resources",
+          "to": ".",
           "filter": [
             "*"
           ]
